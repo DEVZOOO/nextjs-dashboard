@@ -1,3 +1,4 @@
+// 최초 placeholder-data 데이터 insert문
 // import bcrypt from 'bcrypt';
 // import { db } from '@vercel/postgres';
 // import { invoices, customers, revenue, users } from '../lib/placeholder-data';
