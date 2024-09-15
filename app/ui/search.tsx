@@ -15,9 +15,12 @@ export default function Search({ placeholder }: { placeholder: string }) {
    */
   const handleSearch = useDebouncedCallback((term: string) => {
     // useDebouncedCallback : 사용자가 입력을 멈추고 300ms 후 실행
-    console.log('Searching: ', term);
+    // console.log('Searching: ', term);
 
     const param = new URLSearchParams(searchParam);
+
+    // 검색어 변경시 페이지번호 리셋
+    param.set('page', '1');
 
     // 검색어 변경되면 새로운 파라미터로 query string 만듬
     if (term) {
