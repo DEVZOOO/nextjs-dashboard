@@ -14,6 +14,7 @@ const FormSchema = z.object({
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, data: true, });
+const UpdateInvoice = FormSchema.omit({ id: true, data: true, });
 
 /**
  * invoice 생성
@@ -56,3 +57,41 @@ VALUES (
     redirect('/dashboard/invoices');
 }
 
+/**
+ * invoice 수정
+ * @param id 수정할 invoice id
+ * @param formData 수정 input data
+ */
+export async function updateInvoice(id: string, formData: FormData) {
+    const { customerId, amount, status } = UpdateInvoice.parse({
+        customerId: formData.get('customerId'),
+        amount: formData.get('amount'),
+        status: formData.get('status'),
+    });
+
+    const amountInCents = amount * 100;
+
+    await sql`
+UPDATE invoices
+SET customer_id = ${customerId},
+    amount = ${amountInCents},
+    status = ${status}
+WHERE id = ${id}
+    `;
+
+    revalidatePath('/dashboard/invoices');
+    redirect('/dashboard/invoices');
+}
+
+/**
+ * invoice 삭제
+ * @param id 삭제할 invoice id
+ */
+export async function deleteInvoice(id: string) {
+    await sql`
+DELETE FROM invoices
+WHERE id = ${id}
+    `;
+
+    revalidatePath('/dashboard/invoices');
+}
