@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { AuthError } from 'next-auth';
+import { signIn } from '@/auth';
 
 const FormSchema = z.object({
     id: z.string(),
@@ -11,7 +13,7 @@ const FormSchema = z.object({
         invalid_type_error: 'Please select a customer.',
     }),
     amount: z.coerce.number()  // validate시에 number 타입으로 강제함
-        .gt(0, {message: 'Please enter an amount greater than $0.'}),
+        .gt(0, { message: 'Please enter an amount greater than $0.' }),
     status: z.enum(['pending', 'paid'], {
         invalid_type_error: 'Please select an invoice status.',
     }),
@@ -77,12 +79,12 @@ export async function createInvoice(prevState: State, formData: FormData) {
             ${date}
         )
             `;
-    } catch(e) {
+    } catch (e) {
         return {
             message: 'Database Error: Failed to create invoice.',
         };
     }
-    
+
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
 }
@@ -117,8 +119,8 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
             status = ${status}
         WHERE id = ${id}
             `;
-        
-    } catch(e) {
+
+    } catch (e) {
         console.log(e);
         return {
             message: 'Database Error: Failed to update invoice.',
@@ -141,11 +143,37 @@ export async function deleteInvoice(id: string) {
         DELETE FROM invoices
         WHERE id = ${id}
             `;
-    } catch(e) {
+    } catch (e) {
         console.log(e);
         return { message: 'Database Error: Failed to Delete Invoice' };
     }
 
     revalidatePath('/dashboard/invoices');
     return { message: 'Deleted Invoice' };
+}
+
+/**
+ * 인증
+ * @param prevState 
+ * @param formData 
+ * @returns 
+ */
+export async function authenticate(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        await signIn('credentials', formData);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return 'Invalid credentials.';
+                default:
+                    return 'Something went wrong.';
+            }
+        }
+
+        throw error;
+    }
 }

@@ -124,7 +124,8 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 </label>
               </div>
             </div>
-            <div id="status-error" aria-live="polite">
+          </div>
+          <div id="status-error" aria-live="polite">
               {
                 state.errors?.status &&
                 state.errors?.status.map((e: string) => (
@@ -134,7 +135,6 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 ))
               }
             </div>
-          </div>
         </fieldset>
       </div>
       <div className="mt-6 flex justify-end gap-4">
